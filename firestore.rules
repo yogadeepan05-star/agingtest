@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── All Firestore access goes through the Cloud Function (Admin SDK). ──────
+    //
+    // The Admin SDK bypasses these rules entirely.
+    // These rules only block direct client-side writes (which could bypass
+    // workflow validation, capture-token checks, and business rule enforcement).
+    //
+    // Strategy:
+    //   - Operators can READ devices and their own capture tokens (for UI refresh).
+    //   - ALL writes to devices and captures go through the Cloud Function only.
+    //   - Everything else is denied by default.
+
+    // Operators may read device records (for live status refresh in the UI).
+    // Writes are blocked — all state changes must go through the API.
+    match /devices/{serial} {
+      allow read:  if request.auth != null
+                   && request.auth.token.operator == true;
+      allow write: if false;  // Cloud Function (Admin SDK) only
+    }
+
+    // Capture tokens: server creates and consumes them via Admin SDK.
+    // Client can read its own token (for debugging), but never write.
+    match /captures/{token} {
+      allow read:  if request.auth != null
+                   && request.auth.token.operator == true;
+      allow write: if false;  // Cloud Function (Admin SDK) only
+    }
+
+    // Deny all other direct client access.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

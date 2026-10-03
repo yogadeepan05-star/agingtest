@@ -1,0 +1,20 @@
+# Firebase Cloud Functions runtime dependencies
+# Python 3.12 (matches firebase.json: runtime: python312)
+#
+# Installation for local emulator:
+#   cd functions && pip install -r requirements.txt
+#
+# Firebase CLI installs these automatically on `firebase deploy`.
+
+firebase-functions>=0.1.0
+firebase-admin>=6.5.0
+
+# OCR engine (RapidOCR uses ONNX Runtime internally)
+rapidocr>=1.4.0
+onnxruntime>=1.16.0
+opencv-python-headless>=4.8.0
+numpy>=1.24.0
+
+# Note: onnxruntime and opencv-python-headless ship with native binaries.
+# The Cloud Functions runtime (python312, Linux x86-64) handles this correctly.
+# Do NOT use opencv-python (it pulls in GUI libraries) — use opencv-python-headless.
